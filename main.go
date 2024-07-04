@@ -4,11 +4,29 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/charmbracelet/log"
+	log "github.com/charmbracelet/log"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 	"github.com/lostdusty/gobalt"
 )
+
+type Logger struct {
+	logger *log.Logger
+}
+
+func (l *Logger) Println(v ...interface{}) {
+	l.logger.Error(v)
+}
+
+func (l *Logger) Printf(format string, v ...interface{}) {
+	l.logger.Printf(format, v...)
+}
+
+func NewLogger() tgbotapi.BotLogger {
+	logger := log.New(os.Stdout)
+	logger.SetLevel(log.DebugLevel)
+	return &Logger{logger: logger}
+}
 
 func main() {
 	godotenv.Load()
@@ -17,8 +35,7 @@ func main() {
 		panic(err)
 	}
 
-	log.SetLevel(log.DebugLevel)
-
+	tgbotapi.SetLogger(NewLogger())
 	bot.Debug = true
 
 	// Create a new UpdateConfig struct with an offset of 0. Offsets are used
