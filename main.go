@@ -87,12 +87,9 @@ func main() {
 				msg.Text += "Oops, something went wrong"
 				msg.Text += "\n" + err.Error()
 			} else {
-				// // Prints out the url from cobalt to download the requested media.
-				// // Output example: https://us4-co.wuk.sh/api/stream?t=wTn-71aaWAcV2RBejNFN.....
-				// fmt.Println(result.URL)
-				msg.Text += "Successfully downloaded!"
-				msg.Text += "\n" + result.Text
-				msg.Text += "\n" + result.Status
+				// Return the url from cobalt to download the requested media.
+				// result.URL -> https://us4-co.wuk.sh/api/stream?t=wTn-71aaWAcV2RBejNFN.....
+				msg.Text += "status: " + result.Text
 				msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 					tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonURL("Download here", result.URL)))
 
