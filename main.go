@@ -10,24 +10,6 @@ import (
 	"github.com/lostdusty/gobalt"
 )
 
-type Logger struct {
-	logger *log.Logger
-}
-
-func (l *Logger) Println(v ...interface{}) {
-	l.logger.Error(v)
-}
-
-func (l *Logger) Printf(format string, v ...interface{}) {
-	l.logger.Printf(format, v...)
-}
-
-func NewLogger() tgbotapi.BotLogger {
-	logger := log.New(os.Stdout)
-	logger.SetLevel(log.DebugLevel)
-	return &Logger{logger: logger}
-}
-
 func main() {
 	godotenv.Load()
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_APITOKEN"))
