@@ -52,9 +52,7 @@ func main() {
 				msg.Text += "status: " + result.Text
 				msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 					tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonURL("Download here", result.URL)))
-
 			}
-
 		}
 
 		if _, err := bot.Send(msg); err != nil {
