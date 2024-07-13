@@ -10,6 +10,13 @@ import (
 	"github.com/lostdusty/gobalt"
 )
 
+var keyboard = tgbotapi.NewInlineKeyboardMarkup(
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("✨ auto", "auto"),
+		tgbotapi.NewInlineKeyboardButtonData("🎶 audio", "audio"),
+	),
+)
+
 func main() {
 	godotenv.Load()
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_APITOKEN"))
