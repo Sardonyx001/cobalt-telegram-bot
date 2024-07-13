@@ -7,6 +7,7 @@ import (
 	log "github.com/charmbracelet/log"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
+	"github.com/lostdusty/gobalt"
 )
 
 var keyboard = tgbotapi.NewInlineKeyboardMarkup(
@@ -42,20 +43,6 @@ func main() {
 				msg.Text += "Send a valid URL pls"
 			} else {
 				msg.ReplyMarkup = keyboard
-				// downloadMedia := gobalt.CreateDefaultSettings()
-				// downloadMedia.Url = u.String()
-				// result, err := gobalt.Run(downloadMedia)
-				// if err != nil {
-				// 	log.Error(err)
-				// 	msg.Text += "Oops, something went wrong"
-				// 	msg.Text += "\n" + err.Error()
-				// } else {
-				// 	// Return the url from cobalt to download the requested media.
-				// 	// result.URL -> https://us4-co.wuk.sh/api/stream?t=wTn-71aaWAcV2RBejNFN.....
-				// 	msg.Text += "status: " + result.Text
-				// 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
-				// 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonURL("Download here", result.URL)))
-				// }
 			}
 			if _, err := bot.Send(msg); err != nil {
 				log.Fatal(err)
@@ -66,10 +53,30 @@ func main() {
 				log.Fatal(err)
 			}
 
-			msg := tgbotapi.NewEditMessageText(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, callback.Text)
-			if _, err := bot.Send(msg); err != nil {
-				log.Fatal(err)
+			msg := tgbotapi.NewEditMessageText(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, "")
+
+			downloadMedia := gobalt.CreateDefaultSettings()
+			downloadMedia.Url = update.CallbackQuery.Message.ReplyToMessage.Text
+
+			if callback.Text == "audio" {
+				downloadMedia.AudioOnly = true
 			}
+			result, err := gobalt.Run(downloadMedia)
+			if err != nil {
+				log.Error(err)
+				msg.Text += "Oops, something went wrong"
+				msg.Text += "\n" + err.Error()
+				if _, err := bot.Send(msg); err != nil {
+					log.Fatal(err)
+				}
+			} else {
+				document := tgbotapi.NewDocument(update.CallbackQuery.Message.Chat.ID, tgbotapi.FileURL(result.URL))
+				_, err := bot.Send(document)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+
 		}
 	}
 }
