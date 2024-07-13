@@ -3,6 +3,8 @@ package main
 import (
 	"net/url"
 	"os"
+	"os/signal"
+	"syscall"
 
 	log "github.com/charmbracelet/log"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -22,8 +24,17 @@ func main() {
 	tgbotapi.SetLogger(NewLogger())
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_APITOKEN"))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Couldn't start Telegram bot: %v", err)
 	}
+
+	// Handle graceful shutdown
+	c := make(chan os.Signal, 3)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		bot.StopReceivingUpdates()
+		os.Exit(0)
+	}()
 
 	bot.Debug = true
 	log.Infof("Authorized on account %s", bot.Self.UserName)
@@ -33,7 +44,7 @@ func main() {
 
 	for update := range updates {
 		if update.Message != nil {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Select a download option")
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 			msg.ReplyToMessageID = update.Message.MessageID
 
 			// Check if the message *is* a valid URL and grab it
@@ -42,6 +53,7 @@ func main() {
 			if err != nil {
 				msg.Text += "Send a valid URL pls"
 			} else {
+				msg.Text += "Select a download option"
 				msg.ReplyMarkup = keyboard
 			}
 			if _, err := bot.Send(msg); err != nil {
@@ -53,7 +65,11 @@ func main() {
 				log.Fatal(err)
 			}
 
-			msg := tgbotapi.NewEditMessageText(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID, "")
+			msg := tgbotapi.NewEditMessageText(
+				update.CallbackQuery.Message.Chat.ID,
+				update.CallbackQuery.Message.MessageID,
+				"",
+			)
 
 			downloadMedia := gobalt.CreateDefaultSettings()
 			downloadMedia.Url = update.CallbackQuery.Message.ReplyToMessage.Text
@@ -70,9 +86,15 @@ func main() {
 					log.Fatal(err)
 				}
 			} else {
-				document := tgbotapi.NewDocument(update.CallbackQuery.Message.Chat.ID, tgbotapi.FileURL(result.URL))
-				_, err := bot.Send(document)
-				if err != nil {
+				var file tgbotapi.Chattable
+				switch callback.Text {
+				case "audio":
+					file = tgbotapi.NewAudio(update.CallbackQuery.Message.Chat.ID, tgbotapi.FileURL(result.URL))
+				default:
+					file = tgbotapi.NewVideo(update.CallbackQuery.Message.Chat.ID, tgbotapi.FileURL(result.URL))
+				}
+
+				if _, err := bot.Send(file); err != nil {
 					log.Fatal(err)
 				}
 			}
