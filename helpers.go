@@ -12,11 +12,11 @@ type Logger struct {
 }
 
 func (l *Logger) Println(v ...interface{}) {
-	l.logger.Error(v)
+	l.logger.Debug(v)
 }
 
 func (l *Logger) Printf(format string, v ...interface{}) {
-	l.logger.Printf(format, v...)
+	l.logger.Debugf(format, v...)
 }
 
 func NewLogger() tgbotapi.BotLogger {
