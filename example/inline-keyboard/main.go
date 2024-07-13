@@ -8,16 +8,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var numericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+var keyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonURL("1.com", "http://1.com"),
-		tgbotapi.NewInlineKeyboardButtonData("2", "2"),
-		tgbotapi.NewInlineKeyboardButtonData("3", "3"),
-	),
-	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("4", "4"),
-		tgbotapi.NewInlineKeyboardButtonData("5", "5"),
-		tgbotapi.NewInlineKeyboardButtonData("6", "6"),
+		tgbotapi.NewInlineKeyboardButtonData("✨ auto", "auto"),
+		tgbotapi.NewInlineKeyboardButtonData("🎶 audio", "audio"),
 	),
 )
 
@@ -43,14 +37,9 @@ func main() {
 		if update.Message != nil {
 			// Construct a new message from the given chat ID and containing
 			// the text that we received.
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-
-			// If the message was open, add a copy of our numeric keyboard.
-			switch update.Message.Text {
-			case "open":
-				msg.ReplyMarkup = numericKeyboard
-
-			}
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Select an option")
+			msg.ReplyToMessageID = update.Message.MessageID
+			msg.ReplyMarkup = keyboard
 
 			// Send the message.
 			if _, err = bot.Send(msg); err != nil {
