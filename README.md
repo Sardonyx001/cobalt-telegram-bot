@@ -1,4 +1,4 @@
-# a telegram bot for the [vobalt.tools](https://cobalt.tools) api
+# a telegram bot for the [cobalt.tools](https://cobalt.tools) api
 
 ## ⚠️ work in progress
 current capabilities:
